@@ -2,21 +2,26 @@ package controllers
 
 import javax.inject._
 
+import org.apache.spark.streaming.Seconds
 import play.api._
+import play.api.inject.ApplicationLifecycle
 import play.api.mvc._
-import services.TwitterStreaming
+import services.SparkService
 
 @Singleton
-class SparkController @Inject() (val twitterStreaming: TwitterStreaming) extends Controller {
+class SparkController @Inject() (configuration : Configuration, lifecycle: ApplicationLifecycle) extends Controller {
 
+  val sparkService = SparkService.getInstance(configuration, lifecycle)
 
   def start = Action {
-    twitterStreaming.startStream()
+    println("starting stream")
+    sparkService.start()
     Ok("")
   }
 
   def stop = Action {
-    twitterStreaming.stopStream()
+    println("stoping stream")
+    sparkService.stop()
     Ok("")
   }
 

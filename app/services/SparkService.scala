@@ -22,7 +22,7 @@ class SparkService private(configuration : Configuration, lifecycle: Application
   val ssc = new StreamingContext(conf, Seconds(1))
 
   lifecycle.addStopHook { () =>
-    Future.successful(ssc.stop())
+    Future.successful(stop())
   }
 
   // Configure Twitter stream
@@ -60,11 +60,14 @@ object SparkService {
 
   private var instance : Option[SparkService] = None
 
-  def getInstance(configuration : Configuration, lifecycle: ApplicationLifecycle) : SparkService = {
+  def getInstance(configuration : Configuration, lifecycle: ApplicationLifecycle) : SparkService = { // TODO : thread safety?
     if (instance.isEmpty) {
-      instance = Some(new SparkService(configuration : Configuration, lifecycle: ApplicationLifecycle))
+      val service = new SparkService(configuration : Configuration, lifecycle: ApplicationLifecycle)
+      instance = Some(service)
+      service
+    } else {
+      instance.get
     }
-    instance.get
   }
 
 }

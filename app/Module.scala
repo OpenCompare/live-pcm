@@ -1,5 +1,4 @@
 import com.google.inject.AbstractModule
-import services.TwitterStreaming
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -14,7 +13,7 @@ import services.TwitterStreaming
 class Module extends AbstractModule {
 
   override def configure() = {
-//    bind(classOf[TwitterStreaming]).to(classOf[TwitterStreaming])
+
   }
 
 }
