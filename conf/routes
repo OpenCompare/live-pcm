@@ -2,6 +2,9 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+GET     /                               controllers.DashboardController.index
+GET     /stream                         controllers.DashboardController.stream
+
 GET     /start                          controllers.SparkController.start
 GET     /stop                           controllers.SparkController.stop
 

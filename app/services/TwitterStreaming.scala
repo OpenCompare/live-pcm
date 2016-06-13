@@ -2,42 +2,19 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import org.apache.spark.SparkConf
-import org.apache.spark.streaming.dstream.ReceiverInputDStream
-import org.apache.spark.streaming.twitter.TwitterUtils
-import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.apache.spark.streaming.Seconds
 import play.api.Configuration
-import twitter4j.auth.AccessToken
-import twitter4j.{Status, TwitterFactory}
+import play.api.inject.ApplicationLifecycle
 
-@Singleton()
-class TwitterStreaming @Inject() (val configuration : Configuration) {
+@Singleton
+class TwitterStreaming @Inject() (configuration : Configuration, lifecycle: ApplicationLifecycle) {
 
-  val consumerKey = configuration.getString("twitter4j.oauth.consumerKey").get
-  val consumerSecret = configuration.getString("twitter4j.oauth.consumerSecret").get
-  val accessToken = configuration.getString("twitter4j.oauth.accessToken").get
-  val accessTokenSecret = configuration.getString("twitter4j.oauth.accessTokenSecret").get
+  val sparkService = SparkService.getInstance(configuration, lifecycle)
 
-
-  val conf = new SparkConf()
-    .setMaster("local[2]")
-    .setAppName("LivePCM")
-
-  val ssc = new StreamingContext(conf, Seconds(1))
-
-
-
-
-  val twitter = TwitterFactory.getSingleton
-  twitter.setOAuthConsumer(consumerKey, consumerSecret)
-  twitter.setOAuthAccessToken(new AccessToken(accessToken, accessTokenSecret))
-
-  val filters = Seq("Euro")
-
-  var tweets : ReceiverInputDStream[Status] = _
 
   def startStream() {
-    tweets = TwitterUtils.createStream(ssc, Some(twitter.getAuthorization), filters)
+    val filters = Seq("Euro")
+    val tweets = sparkService.getTwitterStream(filters)
     tweets
 //      .map { tweet =>
 //        tweet.getText
@@ -58,12 +35,12 @@ class TwitterStreaming @Inject() (val configuration : Configuration) {
         }
       }
     println("starting stream")
-    ssc.start()
+    sparkService.start()
   }
 
   def stopStream() {
     println("stoping stream")
-    ssc.stop()
+    sparkService.stop()
   }
 
 }
